@@ -5,30 +5,30 @@ import {createFieldsQuery} from './create-fields-query'
 import {createFieldUpdateQuery} from './create-field-update-query'
 import {createFieldDeleteQuery} from './create-field-delete-query'
 
-const rawQuertIfNotEmpty = config => (query, config) => query.trim().length > 0 ?  mysql(config).raw(query) : 'empty query!'
-const createTable = (table,fields, config) => mysql(config).raw(createTableQuery(table, fields))
+const rawQuertIfNotEmpty = config => (query ) => query.trim().length > 0 ?  mysql(config).raww(query) : 'empty query!'
+const createTable = (table,fields, config) => mysql(config).raww(createTableQuery(table, fields))
 const arrNotEmpty = arr => arr.length > 0
-const tableExists = (table, config) => mysql(config).raw(sql.tableExists(table)).then(arrNotEmpty)
+const tableExists = (table, config) => mysql(config).raww(sql.tableExists(table)).then(arrNotEmpty)
 const mapDatabaseFields = databaseFields => databaseFields.map(field => field.Field)
 const findNewFields = fields => databaseFields => Object.keys(fields).filter(f => databaseFields.indexOf(f) === -1)
 const createNewFields = (table,fields,config) => newFields =>
   createFieldsQuery(table,fields,newFields).split(';').forEach(rawQuertIfNotEmpty(config))
 
-const handleNewFields = (table,fields, config) => mysql(config).raw(sql.tableFields(table))
+const handleNewFields = (table,fields, config) => mysql(config).raww(sql.tableFields(table))
   .then(mapDatabaseFields)
   .then(findNewFields(fields))
   .then(createNewFields(table,fields, config))
 
 const fieldUpdateQuery = (table,fields) => databaseFields => createFieldUpdateQuery(table,fields,databaseFields)
 
-const runQueries = config => queries => queries.split(';').forEach(rawQuertIfNotEmpty)
+const runQueries = config => queries => queries.split(';').forEach(rawQuertIfNotEmpty(config))
 
-const handleChangedFields = (table,fields, config) => oldResult => mysql(config).raw(sql.tableFields(table))
+const handleChangedFields = (table,fields, config) => oldResult => mysql(config).raww(sql.tableFields(table))
   .then(fieldUpdateQuery(table,fields))
   .then(runQueries(config))
 
 const fieldDeleteQuery = (table,fields) => databaseFields => createFieldDeleteQuery(table,fields,databaseFields)
-const handleRemovedFields = (table,fields, config) => old => mysql(config).raw(sql.tableFields(table))
+const handleRemovedFields = (table,fields, config) => old => mysql(config).raww(sql.tableFields(table))
   .then(fieldDeleteQuery(table,fields))
   .then(runQueries(config))
 
