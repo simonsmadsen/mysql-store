@@ -11,7 +11,6 @@ const makeConfig = (config) => {
   if (config.mac) {
     dbConfig.socketPath = '/tmp/mysql.sock'
   }
-  console.log(dbConfig)
   return dbConfig
 }
 

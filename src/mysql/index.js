@@ -88,8 +88,8 @@ const defaultFunc = config => ({
   select: (table, where, orderBy, limit = 0) => getConnection(config)
     .then(runQuery(sql.select(table, prepareWhere(where) + prepareOrder(orderBy) + prepareLimit(limit)), whereValues(where)))
     .then(r => r[0]),
-  raw: sqlQuery => getConnection(config)
-    .then(runQuery(sqlQuery))
+  raw: (sqlQuery, values) => getConnection(config)
+    .then(runQuery(sqlQuery, values))
     .then(r => r[0]),
   truncate: table => getConnection(config)
     .then(runQuery(`TRUNCATE TABLE ${table}`))
