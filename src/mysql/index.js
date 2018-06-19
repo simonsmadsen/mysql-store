@@ -32,14 +32,14 @@ const sqlValuesPrepared = obj => Object.values(obj).map(_ => '?').join()
 
 const objectToCreateQuery = (table, obj) => sql.insert(table, sqlFields(obj), sqlValuesPrepared(obj))
 
-const printQuery = (query, vals) => {
-  return  query
-}
+const printQuery = (query, vals) => query
 
 const runQuery = (query, values) => conn => conn.execute(printQuery(query, values), values)
   .then((r) => {
+    conn.release()
     return r
-  })
+  }
+  )
 
 const queryCreate = (table, obj) => conn =>
   runQuery(objectToCreateQuery(table, obj), sqlValues(obj))(conn)
@@ -69,14 +69,12 @@ const defaultFunc = config => ({
       whereValues(removeEmpty(where) || {})
     ))
     .then(takeFirst),
-  update: (table, updates, where) => {
-    return getConnection(config)
-      .then(runQuery(
-        sql.update(table, prepareUpdate(updates), prepareWhere(where)),
-        prepareUpdateValues(updates).concat(whereValues(where))
-      ))
-      .then(r => r[0])
-  },
+  update: (table, updates, where) => getConnection(config)
+    .then(runQuery(
+      sql.update(table, prepareUpdate(updates), prepareWhere(where)),
+      prepareUpdateValues(updates).concat(whereValues(where))
+    ))
+    .then(r => r[0]),
   _delete: (table, where) => getConnection(config)
     .then(runQuery(sql._delete(table, prepareWhere(where)), whereValues(where))),
   selectCols: (table, fields, where, orderBy, limit = 0) => getConnection(config)
@@ -91,7 +89,7 @@ const defaultFunc = config => ({
   raw: (sqlQuery, values = []) => getConnection(config)
     .then(runQuery(sqlQuery, values))
     .then(r => r[0]),
-  raww: (sqlQuery) => getConnection(config)
+  raww: sqlQuery => getConnection(config)
     .then(runQuery(sqlQuery))
     .then(r => r[0]),
   truncate: table => getConnection(config)
@@ -99,7 +97,7 @@ const defaultFunc = config => ({
     .then(r => r[0])
 })
 
-const store = config => Object.assign( {} , defaultFunc(config),({
+const store = config => Object.assign({}, defaultFunc(config), ({
   table: table => ({
     delete: where => defaultFunc(config)._delete(table, where),
     find: where => defaultFunc(config).find(table, where),

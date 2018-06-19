@@ -6,7 +6,7 @@ const makeConfig = (config) => {
     user: config.user || 'root',
     password: config.password || '',
     database: config.database || '',
-    port: config.port ? config.port : 3306,
+    port: config.port ? config.port : 3306
   }
   if (config.mac) {
     dbConfig.socketPath = '/tmp/mysql.sock'
@@ -14,8 +14,8 @@ const makeConfig = (config) => {
   return dbConfig
 }
 
-//if (config.mac === 'true') {
+// if (config.mac === 'true') {
 //  dbConfig.socketPath = '/tmp/mysql.sock'
-//}
+// }
 
 export const connectionPool = config => mysql.createPool(makeConfig(config))
